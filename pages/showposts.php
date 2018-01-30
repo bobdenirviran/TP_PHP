@@ -5,7 +5,6 @@
 //
 // CHARGEMENT DU NUEMRO DE PAGE
 //
-$subject_id = "";
 $index_page=0; // Chargement en global du numéro de page
 if( isset( $_GET["index_page"] ) ) { // Test de la présence de la données dans les données reçues
     $index_page = $_GET["index_page"]; // Chargement en variable de la donnée numéro de page
@@ -33,6 +32,7 @@ if( isset( $_GET["Pid"] ) ){ // Test de la présence de la données dans les don
 //
 // TEST DE PRESENCE DES DONNEES DE LA PAGE DES POSTS
 //
+$subject_id = "";
 if( isset( $_GET["Sid"] ) ) { // test de présence de l'id du sujet sélectionné
     //
     // RECHERCHE DU SUJET SELECTIONNE ET COMPTAGE DES POSTS
@@ -41,7 +41,7 @@ if( isset( $_GET["Sid"] ) ) { // test de présence de l'id du sujet sélectionn�
     $subject = getSubjectById( $subject_id ); // fonction de recherche du sujet sélectionné avec comptage des posts
     $_SESSION["subject"] = $subject;
     //
-    // AFFICHAGE DU SUJET EXISTANT
+    // TEST DU SUJET EXISTANT ET CHARGEMENT DES DONNEES
     //
     if ( $_SESSION["subject"]["Sid"] !== null ) { // si sujet trouvé dans la base
         $_SESSION["subject"]["nbposts"] = intval($_SESSION["subject"]["nbposts"]); // conversion du nombre de posts en numérique entier
@@ -50,17 +50,32 @@ if( isset( $_GET["Sid"] ) ) { // test de présence de l'id du sujet sélectionn�
         $_SESSION["subject"]["Sid_categorie"] = intval($_SESSION["subject"]["Sid_categorie"]); // Conversion de la catégoriede sujet
         $categorie_id = $_SESSION["subject"]["Sid_categorie"];
         $_SESSION["subject"]["Sid_user"] = intval($_SESSION["subject"]["Sid_user"]); // conversion de l'id de créateur du sujet en numérique entier
-        $html_subject  = '<div>Catégorie : ' . $_SESSION["subject"]["Cname"] ; // Afficher la catégorie
-        $html_subject .=    '<span> Sujet : '  . $subject["Slabel"]    . ' </span>'; // Titre du sujet
-        $html_subject .=    '<span> Créé par ' . $subject["username"]  . ' </span>'; // Nom de l'auteur du sujet
-        $html_subject .=    '<span> le '       . $subject["Sdate"]     . ' </span>'; // Date de création du sujet
-        $html_subject .=    '<span> contient ' . $subject["nbposts"]   . ' post(s) </span>'; // Nombre de posts du sujet
-        $html_subject .=    '<a href="?page=showsubjects">Choisir un autre sujet</a>'; // Lien vers la liste des sujets pour en choisir un autre
+        //
+        // AFFICHAGE DU SUJET EXISTANT
+        //
+        $html_subject = '<p>Catégorie : ' . $_SESSION["subject"]["Cname"] . '</p>'; // Afficher la catégorie
+        $html_subject .= '<p><table>';
+        $html_subject .= '<tr>'; // Entete du tableau des posts
+            $html_subject .= '<th>Sujet</th>';
+            $html_subject .= '<th>Auteur</th>';
+            $html_subject .= '<th>Date</th>';
+            $html_subject .= '<th>Nb posts</th>';
+            $html_subject .= '<th>Actions</th>';
+        $html_subject .= '</tr>';
+        $html_subject .= '<tr>'; // ligne du tableau du sujet
+        $html_subject .=    '<td>' . $subject["Slabel"]    . ' </td>'; // Titre du sujet
+        $html_subject .=    '<td>' . $subject["username"]  . ' </td>'; // Nom de l'auteur du sujet
+        $html_subject .=    '<td>' . $subject["Sdate"]     . ' </td>'; // Date de création du sujet
+        $html_subject .=    '<td>' . $subject["nbposts"]   . ' </td>'; // Nombre de posts du sujet
+        $html_subject .=    '<td>';
+        $html_subject .=         '<a href="?page=showsubjects">Choisir un autre sujet</a>'; // Lien vers la liste des sujets pour en choisir un autre
         if ( $action == "2" || $action == "3" ) {
-            $html_subject .= '<span> </span>';
-            $html_subject .= '<a href="?page=showposts&Sid=' . $subject_id . '">Envoyer un nouveau message</a>'; // Lien vers la création de message
+                $html_subject .= '<span> </span>';
+                $html_subject .= '<a href="?page=showposts&Sid=' . $subject_id . '">Envoyer un nouveau message</a>'; // Lien vers la création de message
         }
-        $html_subject .= '</div>';
+        $html_subject .= '</td>';
+        $html_subject .= '</tr>';
+        $html_subject .= '</table></p>';
         echo $html_subject;
         //
         // RECHERCHE ET CHARGEMENT DE LA PAGE DES POSTS DU SUJET
@@ -68,33 +83,47 @@ if( isset( $_GET["Sid"] ) ) { // test de présence de l'id du sujet sélectionn�
         $postrows = getPageOfPostsForOneSubject( $subject_id, $index_page ); // fonction de recherche d'une page de posts du sujet sélectionné
         if( count($postrows) ) { // Test de présence de post pour le sujet
             //
-            // AFFICHAGE DE LA PAGE DE CHAQUE POST DU SUJET
+            // AFFICHAGE DE L'ENTETE DES POSTS DU SUJET
             //
+            $html_entete_post = '';
+            $html_entete_post .= '<p><table>';
+            $html_entete_post .= '<tr>'; // Entete du tableau des posts
+            $html_entete_post .=   '<th>Titre</th>';
+            $html_entete_post .=   '<th>Auteur</th>';
+            $html_entete_post .=   '<th>Date</th>';
+            $html_entete_post .=   '<th>Message</th>';
+            $html_entete_post .=   '<th>Actions</th>';
+            $html_entete_post .= '</tr>'; 
+            Echo $html_entete_post;
+            $html_post = '';
             foreach( $postrows as $key => $row ) { // Afficher le post pour chaque enregistrement prendre toutes les valeurs de l'enregistrement
-                $html_post = '<div style="border: 1px solid black; margin: 5px;">';
-                $html_post .=   '<span> Message : ' . $postrows[$key]["Ptitle"]   . ' </span>';
-                $html_post .=   '<span> Créé par '  . $postrows[$key]["username"] . ' </span>';
-                $html_post .=   '<span> le '        . $postrows[$key]["Pdate"]    . ' </span>';
-                $html_post .=   '<span> a écrit : ' . $postrows[$key]["Ptext"]    . ' post(s)</span>';
+                $html_post .= '<tr>';
+                    $html_post .= '<td>' . $postrows[$key]["Ptitle"]   . '</td>';
+                    $html_post .= '<td>' . $postrows[$key]["username"] . '</td>';
+                    $html_post .= '<td>' . $postrows[$key]["Pdate"]    . '</td>';
+                    $html_post .= '<td>' . $postrows[$key]["Ptext"]    . '</td>';
+                    $html_post .= '<td> ';
                 //   
                 // AFFICHER LE LIEN DE LA MODIFICATION POUR CHAQUE MESSSAGE SI USER AUTEUR
                 //
-                if( intval( $postrows[$key]["Pid_user"] ) == $_SESSION["user"]["id"] ) { // Test du membre connecté est l'auteur du message
+                if( intval( $postrows[$key]["Pid_user"] ) == $_SESSION["user"]["id"] && $_SESSION["subject"]["Sclosed"] == 0 ) {  // Test du membre connecté est l'auteur du message ou si sujet non clos
                     $_SESSION["Ptitle"] = htmlspecialchars($postrows[$key]["Ptitle"]); // conservation du champs titre du message (max 255 car.) en session pour éviter de le passer dans l'url ou le POST
                     $_SESSION["Ptext"] = htmlspecialchars($postrows[$key]["Ptext"]); // conservation du champs texte du message (max 1000 car.) en session pour éviter de le passer dans l'url ou le POST
-                    $html_post .=   '<span> </span>';
-                    $html_post .=   '<a href="?page=showposts&action=2&Uid=' . $postrows[$key]["Pid_user"] .'&Pid=' . $postrows[$key]["Pid"]  . '&Sid=' . $postrows[$key]["Pid_subject"] . '">Modifier</a>';
+                    $html_post .= '<span> </span>';
+                    $html_post .= '<a href="?page=showposts&action=2&Uid=' . $postrows[$key]["Pid_user"] .'&Pid=' . $postrows[$key]["Pid"]  . '&Sid=' . $postrows[$key]["Pid_subject"] . '">Modifier</a>';
                 }
                 //   
-                // AFFICHER LE LIEN DE LA SUPPRESSION POUR CHAQUE MESSAGE SI ADMIN OU MODO OU USER AUTEUR
+                // AFFICHER LE LIEN DE LA SUPPRESSION POUR CHAQUE MESSAGE SI ADMIN OU MODERATEUR OU USER AUTEUR
                 //
-                if( intval( $postrows[$key]["Pid_user"] ) == $_SESSION["user"]["id"] || $_SESSION["user"]["id_role"] < 3 ) { // Test du membre connecté est l'auteur du message Ou si membre connecté est un administrateur ou un modérateur
-                    $html_post .=   '<span> </span>';
-                    $html_post .=   '<a href="?page=showposts&action=3&Uid=' . $postrows[$key]["Pid_user"] . '&Pid=' . $postrows[$key]["Pid"]  . '&Sid=' . $postrows[$key]["Pid_subject"] . '">Supprimer</a>';
+                if( (intval( $postrows[$key]["Pid_user"] ) == $_SESSION["user"]["id"] && $_SESSION["subject"]["Sclosed"] == 0 ) || $_SESSION["user"]["id_role"] < 3  ) { // Test du membre connecté est l'auteur du message Ou si membre connecté est un administrateur ou un modérateur ou si sujet non clos
+                    $html_post .= '<span> </span>';
+                    $html_post .= '<a href="?page=showposts&action=3&Uid=' . $postrows[$key]["Pid_user"] . '&Pid=' . $postrows[$key]["Pid"]  . '&Sid=' . $postrows[$key]["Pid_subject"] . '">Supprimer</a>';
                 }
-                $html_post .= '</div>';
-                echo $html_post;
+                    $html_post .= '</td>';
+                    $html_post .= '</tr>';
             }
+            $html_post .= '</table></p>';
+            echo $html_post;
             //
             // CALCUL DU NOMBRE DE PAGES ET AFFICHAGE DE LA LISTE HORIZONTALE DES PAGES DE POST
             //

@@ -13,10 +13,7 @@ $html_formpost = ""; // Mise à vide du formulaire et chargement global de la va
         // Afichage Envoi d'un nouveau message seul
         $html_formpost .= "<h4>Donnez un titre et saisissez votre message</h4>";
         $html_formpost .= '<form action="?service=create_post&action=0&Sid=' . $subject_id . '" method="POST">'; // renvoie vers le service de creation de message
-        $html_formpost .= '<label>Titre :</label>';
-        $html_formpost .= '<input type="text" name="Ptitle" maxlength="255" placeholder="min. 1 car. max. 255 car.">';
-        $html_formpost .= '<label>Texte :</label>';
-        $html_formpost .= '<input type="text" name="Ptext" maxlength="255" placeholder="min. 1 car. max. 1000 car.">';
+        include "postformcreate.php";  // Saisie des champs Titre et Texte
         $html_formpost .= '<input type="submit" value="Envoyer le message">'; // Bouton envoyer en creation de message avec ou sans sujet
     } else {
         $error = urlencode("Absence de données en envoi de message !"); 
@@ -30,10 +27,7 @@ $html_formpost = ""; // Mise à vide du formulaire et chargement global de la va
         // Affichage Envoi d'un message après la création d'un sujet
         $html_formpost .= "<h4>Saisissez le premier message de ce sujet</h4>";
         $html_formpost .= '<form action="?service=create_post&action=1&Cid=' . $categorie_id . '&Slabel=' . $subject_label . '" method="POST">'; // renvoie vers le service de creation de message
-        $html_formpost .= '<label>Titre :</label>';
-        $html_formpost .= '<input type="text" name="Ptitle" maxlength="255" placeholder="min. 1 car. max. 255 car.">';
-        $html_formpost .= '<label>Texte :</label>';
-        $html_formpost .= '<input type="text" name="Ptext" maxlength="255" placeholder="min. 1 car. max. 1000 car.">';
+        include "postformcreate.php"; // Saisie des champs Titre et Texte
         $html_formpost .= '<input type="submit" value="Envoyer le message">'; // Bouton envoyer en creation de message avec ou sans sujet
     } else {
         $error = urlencode("Absence de données en création de sujet sur le premier message !"); 
@@ -50,10 +44,7 @@ $html_formpost = ""; // Mise à vide du formulaire et chargement global de la va
         // Affichage Modification d'un message
         $html_formpost .= "<h4>Saisissez les modifications du message</h4>";
         $html_formpost .= '<form action="?service=update_post&action=2&Uid=' . $user_id . '&Pid=' . $post_id . '&Sid=' . $subject_id . '" method="POST">'; // renvoie vers le service de update de message
-        $html_formpost .= '<label>Titre :</label>';
-        $html_formpost .= '<input type="text" name="Ptitle" value="' . $postrows[$key]['Ptitle'] . '" maxlength="255" placeholder="min. 1 car. max. 255 car.">';
-        $html_formpost .= '<label>Texte :</label>';
-        $html_formpost .= '<input type="text" name="Ptext" value="' . $postrows[$key]['Ptext'] . '" maxlength="255" placeholder="min. 1 car. max. 1000 car.">';
+        include "postformodsup.php"; // Saisie des champs Titre et Texte avec affichage préalable des values
         $html_formpost .= '<input type="submit" value="Confirmez les modifications du message">'; // bouton confirmation en cas de modification
     } else {
         $error = urlencode("Absence de données en modification de message !"); 
@@ -69,10 +60,7 @@ $html_formpost = ""; // Mise à vide du formulaire et chargement global de la va
         // Affichage Suppression d'un message
         $html_formpost = "<h4>Confirmez la suppression de ce message</h4>";
         $html_formpost .= '<form action="?service=delete_post&action=3&Uid=' . $user_id . '&Pid=' . $post_id . '&Sid=' . $subject_id . '&nbposts=' . $nbposts . '" method="POST">'; // renvoie vers le service de delete de message
-        $html_formpost .= '<label>Titre :</label>';
-        $html_formpost .= '<input type="text" name="Ptitle" value="' . $postrows[$key]['Ptitle'] . '" maxlength="255" placeholder="min. 1 car. max. 255 car.">';
-        $html_formpost .= '<label>Texte :</label>';
-        $html_formpost .= '<input type="text" name="Ptext" value="' . $postrows[$key]['Ptext'] . '" maxlength="255" placeholder="min. 1 car. max. 1000 car.">';
+        include "postformodsup.php"; // Saisie des champs Titre et Texte avec affichage préalable des values
         $html_formpost .= '<input type="submit" value="Confirmez la suppression de ce message">'; // bouton confimation de suppression
     } else {
         $error = urlencode("Absence de données en suppression de message !");

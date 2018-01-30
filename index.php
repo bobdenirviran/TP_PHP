@@ -1,5 +1,5 @@
 <?php
-//
+// FORUM auteur Bernard Boivin
 // ROUTEUR PROCEDURAL
 //
     //
@@ -30,9 +30,13 @@
                 connectionRequired();
                 include "services/service_delete_subject.php";
                 break;
-            case "close_subject": // L'admin ou le modérateur ferme un sujet accessible en lecture seulement mais plus en modif ni suppression
+            case "close_subject": // L'admin ou le modérateur ferme un sujet accessible en lecture seulement mais plus en création modif ni suppression de message sauf suppression admin
                 connectionRequired();
                 include "services/service_close_subject.php";
+                break;
+            case "open_subject": // L'admin ou le modérateur reouvre un sujet accessible en lecture seulement
+                connectionRequired();
+                include "services/service_open_subject.php";
                 break;
             case "create_post": // un utilisateur créer un post dans un sujet
                 connectionRequired(); 
@@ -85,5 +89,4 @@
     include "commons/header.php";
     include $page_file;
     include "commons/footer.php";
-
 ?>

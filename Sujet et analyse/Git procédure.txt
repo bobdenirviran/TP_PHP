@@ -1,0 +1,23 @@
+<?php
+// INITIALISATION LA PREMIERE FOIS DU REPOSITORY LOCAL
+// git init
+
+// MISE A JOUR DU REPOSITORY LOCAL
+// git add .
+// git status
+
+// MISE A JOUR LA PREMIERE FOIS
+// git commit -m "message"
+
+// MISE A JOUR QUOTIDIENNE (TH_php = origin ou nom du repository) à faire à l'exterieur du repertoire a sauvegarder
+// git push -u TP_php master
+
+// RECUPERER LE REPOSITORY D'UNE VERSION EN LOCAL à faire à l'exterieur du repertoire a sauvegarder
+// git clone https://github.com/bobdenirviran/TP_PHP
+
+// RECUPERER LE REPOSITORY DANS LE REPERTOIRE DE TRAVAIL à faire dans le répertoire de travail
+// git pull https://github.com/bobdenirviran/TP_PHP
+
+// CHARGEMENT SUR UNE AUTRE MACHINE
+// git remote add Tp_php https://github.com/bobdenirviran/TP_PHP
+?>
