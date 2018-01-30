@@ -29,7 +29,7 @@ foreach( $subjectslist as $subject_value ) { // pour chaque enregistrement prend
             $html_subject .= '<span> le '       . $subject_value["Sdate"]     . ' </span>';
             $html_subject .= '<span> contient ' . $subject_value["nbposts"]   . ' post(s) </span>';
             $html_subject .= '<a href="?page=showposts&Sid=' . $subject_value["Sid"] . '">Voir les messages</a>';
-            if (intval($_SESSION["user"]["id_role"]) < 3) { // Test du role du user Moderateur ou Adminsitrateur pour fermer un sujet
+            if (intval($_SESSION["user"]["id_role"]) < 3 && $subject_value["Sclosed"] !== "1" ) { // Test du role du user Moderateur ou Adminsitrateur pour fermer un sujet et sujet pas encore clos
                 $html_subject .= '<span> </span>';
                 $html_subject .= '<a href="?service=close_subject&Sid=' . $subject_value["Sid"] . '">Clore le sujet</a>'; // lien vers service fermer sujet 
             }

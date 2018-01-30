@@ -5,7 +5,9 @@
 //
 // CHARGEMENT DU NUEMRO DE PAGE
 //
-if( isset( $_GET["index_page"] ) ){ // Test de la présence de la données dans les données reçues
+$subject_id = "";
+$index_page=0; // Chargement en global du numéro de page
+if( isset( $_GET["index_page"] ) ) { // Test de la présence de la données dans les données reçues
     $index_page = $_GET["index_page"]; // Chargement en variable de la donnée numéro de page
 } else {
     $index_page = 0; // Chargement de la première page par défaut
@@ -16,10 +18,11 @@ echo "<h1>Liste des posts - Page " . $numpage . "</h1>";
 // CHARGEMENT DE L'ACTION CHOISIE OU PAR DEFAUT
 //
 // 0 = Creation de post, 1 = Creation de sujet et de post, 2 = Modif de post, 3 = Suppression de post
-if( isset( $_GET["action"] ) ){ // Test de la présence de la données dans les données reçues
-    $action = $_GET["action"]; // Chargement en variable de la donnée action
+$action = "0";
+if( isset( $_GET["action"] ) ) { // Test de la présence de la données dans les données reçues
+    $action = ($_GET["action"]); // Chargement en variable de la donnée action
 } else {
-    $action = 0; // Chargement de l'action' par défaut
+    $action = "0"; // Chargement de l'action' par défaut
 }
 //
 // CHARGEMENT DE L'ID POST A TRAITER
@@ -72,16 +75,20 @@ if( isset( $_GET["Sid"] ) ) { // test de présence de l'id du sujet sélectionn�
                 $html_post .=   '<span> Message : ' . $postrows[$key]["Ptitle"]   . ' </span>';
                 $html_post .=   '<span> Créé par '  . $postrows[$key]["username"] . ' </span>';
                 $html_post .=   '<span> le '        . $postrows[$key]["Pdate"]    . ' </span>';
-                $html_post .=   '<span> a écrit : ' . $postrows[$key]["Ptext"]    . ' post(s) </span>';
-                // 
-                // TEST DES DROITS D'ACCES AU SERVICE DE MODIFICATION ET DE SUPPRESSION PAR AUTEUR DU MESSAGE OU ADMIN OU MODERATEUR
+                $html_post .=   '<span> a écrit : ' . $postrows[$key]["Ptext"]    . ' post(s)</span>';
+                //   
+                // AFFICHER LE LIEN DE LA MODIFICATION POUR CHAQUE MESSSAGE SI USER AUTEUR
                 //
-                if( intval( $postrows[$key]["Pid_user"] ) == $_SESSION["user"]["id"] // Test du membre connecté est l'auteur du message Ou si membre connecté est un administrateur ou un modérateur
-                || $_SESSION["user"]["id_role"] < 3 ) { 
-                    //   
-                    // AFFICHER LE LIEN DE LA MODIFICATION ET DE LA SUPPRESSION POUR CHAQUE POST
-                    //
+                if( intval( $postrows[$key]["Pid_user"] ) == $_SESSION["user"]["id"] ) { // Test du membre connecté est l'auteur du message
+                    $_SESSION["Ptitle"] = htmlspecialchars($postrows[$key]["Ptitle"]); // conservation du champs titre du message (max 255 car.) en session pour éviter de le passer dans l'url ou le POST
+                    $_SESSION["Ptext"] = htmlspecialchars($postrows[$key]["Ptext"]); // conservation du champs texte du message (max 1000 car.) en session pour éviter de le passer dans l'url ou le POST
+                    $html_post .=   '<span> </span>';
                     $html_post .=   '<a href="?page=showposts&action=2&Uid=' . $postrows[$key]["Pid_user"] .'&Pid=' . $postrows[$key]["Pid"]  . '&Sid=' . $postrows[$key]["Pid_subject"] . '">Modifier</a>';
+                }
+                //   
+                // AFFICHER LE LIEN DE LA SUPPRESSION POUR CHAQUE MESSAGE SI ADMIN OU MODO OU USER AUTEUR
+                //
+                if( intval( $postrows[$key]["Pid_user"] ) == $_SESSION["user"]["id"] || $_SESSION["user"]["id_role"] < 3 ) { // Test du membre connecté est l'auteur du message Ou si membre connecté est un administrateur ou un modérateur
                     $html_post .=   '<span> </span>';
                     $html_post .=   '<a href="?page=showposts&action=3&Uid=' . $postrows[$key]["Pid_user"] . '&Pid=' . $postrows[$key]["Pid"]  . '&Sid=' . $postrows[$key]["Pid_subject"] . '">Supprimer</a>';
                 }
@@ -99,7 +106,6 @@ if( isset( $_GET["Sid"] ) ) { // test de présence de l'id du sujet sélectionn�
                 $html_pages = '<ul style="list-style-type: none;">';
                 $html_pages .= '<span>Page(s) </span>';                                  
                 for( $numpage=0; $numpage < $nb_pages; $numpage++ ){ // Pour toutes les pages
-                    // var_dump($numpage , $index_page);
                         $html_pages .= '<li Style = "display: inline-block; ">'; // Liste avec numero de page horizontalement
                         if ( $numpage+1 == $index_page ) {
                             $html_pages .=  '<a href="?page=showposts&Sid=' . $postrows[$key]["Pid_subject"] . '&index_page=' . $numpage .'" >' ; // affichage du lien vers la page

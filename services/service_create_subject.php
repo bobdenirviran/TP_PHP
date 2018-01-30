@@ -3,11 +3,14 @@
 // SERVICE DE VALIDATION D'UN NOUVEAU SUJET
 //
     // TEST DE LA PRESENCE DANS LE SUJET DE LA DONNEE DE TITRE DE SUJET
-    if( isset( $_POST["Slabel"] ) && isset( $_GET["Cid"]) ) { // Si présence d'un libellé de nouveau sujet et Id de catégorie
+    // debug($_POST["Slabel"]);
+    // debug($_GET["Cid"]);
+    if( isset( $_POST["Slabel"] ) && isset ( $_GET["action"] ) && isset( $_GET["Cid"] ) ) { // Si présence d'un libellé de nouveau sujet et Id de catégorie
+        $action = $_GET["action"];
         $subject_label = $_POST["Slabel"];
         $categorie_id = $_GET["Cid"];
         // RECHERCHE DU SUJET SUR LE TITRE
-            $existed = getSubjectByLabel($subject_label); // Recherche d'un titre de sujet déjà existant
+        $existed = getSubjectByLabel($subject_label); // Recherche d'un titre de sujet déjà existant
         // TEST DE CREATION DE SUJET DEJA EXISTANT SUR LE TITRE DU SUJET
         if( $existed ) {
             $error = urlencode("Le titre de ce sujet existe déjà !");
@@ -20,7 +23,7 @@
                 header("Location: ?page=showsubjects&error=".$error); // Recharger la page des sujets avec le message
                 die();
             } else {
-                $error = urlencode("Creation du premier message");
+                $error = urlencode("Creation du premier message effecuée");
                 $subject_label = htmlspecialchars($subject_label);
                 header("Location: ?page=createpost&action=1&Cid=" . $categorie_id . "&Slabel=" . $subject_label ); // envoi de la page de creation des posts
                 die();

@@ -52,7 +52,7 @@ function connectionRequired( $as_role = USER ) { // forcer le role en utlisateur
         die(); // tuer la tache
     }
     else if( !isLogged( $as_role ) ){ // sinon pas logué 
-        $error = "Vous n'avez pas les autorisations nécessaires !"; // chargé le message d'erreur
+        $error = urlencode("Vous n'avez pas les autorisations nécessaires !"); // chargé le message d'erreur
         header("Location: ?page=login&error=".$error); // revoyé la page login avec erreur d'autorisation
         die(); // tuer la tache
     }
@@ -73,7 +73,6 @@ function isGranted( $id_role, $id_grant ) {
     mysqli_stmt_bind_result( $statement, $result );
     mysqli_stmt_fetch( $statement );
     return (boolean)$result; //cast converting
-    // $_SESSION["user"] = id / username / password / id_role
 }
 //
 // RECUPERATION DES DONNES username et password DES UTILISATEURS
@@ -120,6 +119,24 @@ function getUser( $username, $password ) {
     return $user;
 }
 //
+// RECHERCHE D'UN SUJET PAR LE TITRE
+//
+function getSubjectByLabel( $subject_label ) { 
+
+    $connection = getConnection(); // Connexion à la base de données
+    $sql = "SELECT COUNT(*) FROM subjects WHERE subjects.Slabel=?"; // Select des valeurs de la base de données en variables cachées
+    $statement = mysqli_prepare( $connection, $sql ); // Preparation de la requete
+    mysqli_stmt_bind_param( $statement, "s", $subject_label ); // Passage des parametres cachés
+    mysqli_stmt_execute( $statement ); // Exécution de la requete 
+    mysqli_stmt_bind_result( $statement, $existed ); // Récupération du résultat et stockage dans une variable 
+    $existed = (boolean)($existed > 0); // Conversion castind de la variable d'existence
+    // mysqli_stmt_fetch( $statement ); // Récupération de résultat requete
+    mysqli_stmt_close( $statement ); // Fermeture de la préparation de la requête
+    mysqli_close( $connection ); // Fermeture de la connexion à la base de données
+    return $existed;
+}
+
+//
 // RECHERCHE DE TOUS LES SUJETS 
 //
 function getAllSubjectsByCategories() {
@@ -159,38 +176,45 @@ function getAllSubjectsByCategories() {
     return $subjectslist;
 }
 //
-// RECHERCHE D'UN SUJET PAR LE TITRE
-//
-function getSubjectByLabel( $subject_label ) { 
+// RECHERCHE DU SUJET ET COMPTAGE DE SES POSTS
+// 
+function getSubjectById( $subject_id ) {
 
-    $connection = getConnection(); // Connexion à la base de données
-    $sql = "SELECT COUNT(*) FROM subjects WHERE subjects.Slabel=?"; // Select des valeurs de la base de données en variables cachées
-    $statement = mysqli_prepare( $connection, $sql ); // Preparation de la requete
-    mysqli_stmt_bind_param( $statement, "s", $subject_label ); // Passage des parametres cachés
-    mysqli_stmt_execute( $statement ); // Exécution de la requete 
-    mysqli_stmt_bind_result( $statement, $existed ); // Récupération du résultat et stockage dans une variable 
-    $existed = (boolean)($existed > 0); // Conversion castind de la variable d'existence
-    // mysqli_stmt_fetch( $statement ); // Récupération de résultat requete
-    mysqli_stmt_close( $statement ); // Fermeture de la préparation de la requête
-    mysqli_close( $connection ); // Fermeture de la connexion à la base de données
-    return $existed;
-}
-//
-// RECHERCHE D'UN SUJET PAR L'ID
-//
-function getSubjectById( $subject_id ) { 
-
-    $connection = getConnection(); // Connexion à la base de données
-    $sql = "SELECT subjects.* FROM subjects WHERE subjects.Sid=?"; // Select des valeurs de la base de données en variables cachées
+    $connection = getConnection(); // Connection à la base de données
+    // Requete SQL sélection des champs du sujet et username de son créateur avec comptages des posts
+    // Jointure interne des sujets sur l'id du sujet du post
+    // Jointure interne des users sur l'id du créateur du sujet
+    // Lorsque l'id du sujet du post correspond au sujet sélectionné
+    $sql = "SELECT subjects.*, users.username, categories.Cname,
+            COUNT(posts.Pid) as nbposts
+            FROM posts
+            JOIN subjects ON subjects.Sid=posts.Pid_subject
+            JOIN users ON users.id=Sid_user
+            JOIN categories ON categories.Cid=subjects.Sid_categorie
+            WHERE posts.Pid_subject=?";
     $statement = mysqli_prepare( $connection, $sql ); // Preparation de la requete
     mysqli_stmt_bind_param( $statement, "i", $subject_id ); // Passage des parametres cachés
-    mysqli_stmt_execute( $statement ); // Exécution de la requete 
-    $_SESSION["subject"] = mysqli_stmt_bind_result( $statement, $existed ); // Récupération du résultat et stockage dans une variable pour la modification du sujet en sujet fermé
-    $existed = (boolean)($existed > 0); // Conversion castind de la variable d'existence
-    // mysqli_stmt_fetch( $statement ); // Récupération de résultat requete
+    mysqli_stmt_execute( $statement ); // Exécution de la requete
+    mysqli_stmt_bind_result( $statement, $b_Sid, $b_Sdate, $b_Slabel, $b_Sclosed, $b_Sid_categorie, $b_Sid_user, $b_username, $b_Cname, $b_nbposts ); // On associe des variables aux colonnes récupérées
+    mysqli_stmt_fetch($statement); // On prend le premier enregistrement ( les variables associées précédemment vont être mises à jour )
+    $subject = null;
+    if( $b_Sid ){
+        $subject = [
+            "Sid" => $b_Sid,
+            "Sdate" => $b_Sdate,
+            "Slabel" => $b_Slabel,
+            "Sclosed" => $b_Sclosed,
+            "Sid_categorie" => $b_Sid_categorie,
+            "Sid_user" => $b_Sid_user,
+            "username" => $b_username,
+            "Cname" => $b_Cname,
+            "nbposts" => $b_nbposts
+        ];
+    }
+    $_SESSION["subject"] = $subject;// garder les champs de sujets en session
     mysqli_stmt_close( $statement ); // Fermeture de la préparation de la requête
     mysqli_close( $connection ); // Fermeture de la connexion à la base de données
-    return $existed;
+    return $subject;
 }
 //
 // INSERT D'UN SUJET
@@ -217,6 +241,24 @@ function insertSubject( $subject ) {
     mysqli_close( $connection ); // Fermeture de la connexion à la base de données
     $inserted = (boolean)($inserted > 0);
     return $inserted;
+}
+//
+// SUPPRESSION D'UN SUJET
+// 
+function deleteSubjectById( $subject_id ) {
+
+    $connection = getConnection(); // Connection à la base de données
+    // Requete SQL suppression du message
+    // Quand l'id du sujet correspond à l'id fournit en parametre
+    $sql = "DELETE FROM subjects WHERE subjects.Sid=? LIMIT 1";
+    $statement = mysqli_prepare( $connection, $sql ); // Preparation de la requete
+    mysqli_stmt_bind_param( $statement, "i", $subject_id ); // Passage des parametres cachés
+    mysqli_stmt_execute( $statement ); // Exécution de la requete 
+    $deleted = mysqli_stmt_affected_rows($statement); // On prend le premier enregistrement ( les variables associées précédemment vont être mises à jour )
+    $deleted = (boolean)($deleted>0); // Cast converting en booléen du flag de retour de suppression
+    mysqli_stmt_close( $statement ); // Fermeture de la préparation de la requête
+    mysqli_close( $connection ); // Fermeture de la connexion à la base de données
+    return $deleted;
 }
 //
 // CLORE UN SUJET PAR MODIFICATION
@@ -307,52 +349,11 @@ function deletePostById( $post_id ) {
     $statement = mysqli_prepare( $connection, $sql ); // Preparation de la requete
     mysqli_stmt_bind_param( $statement, "i", $post_id ); // Passage des parametres cachés
     mysqli_stmt_execute( $statement ); // Exécution de la requete 
-    $deleted = mysqli_stmt_fetch_affected_rows($statement); // On prend le premier enregistrement ( les variables associées précédemment vont être mises à jour )
+    $deleted = mysqli_stmt_affected_rows($statement); // On prend le premier enregistrement ( les variables associées précédemment vont être mises à jour )
     $deleted = (boolean)($deleted>0); // Cast converting en booléen du flag de retour de suppression
     mysqli_stmt_close( $statement ); // Fermeture de la préparation de la requête
     mysqli_close( $connection ); // Fermeture de la connexion à la base de données
     return $deleted;
-}
-//
-// RECHERCHE DU SUJET ET COMPTAGE DE SES POSTS
-// 
-function getSubjectById( $subject_id ) {
-
-    $connection = getConnection(); // Connection à la base de données
-    // Requete SQL sélection des champs du sujet et username de son créateur avec comptages des posts
-    // Jointure interne des sujets sur l'id du sujet du post
-    // Jointure interne des users sur l'id du créateur du sujet
-    // Lorsque l'id du sujet du post correspond au sujet sélectionné
-    $sql = "SELECT subjects.*, users.username, categories.Cname,
-            COUNT(posts.Pid) as nbposts
-            FROM posts
-            JOIN subjects ON subjects.Sid=posts.Pid_subject
-            JOIN users ON users.id=Sid_user
-            JOIN categories ON categories.Cid=subjects.Sid_categorie
-            WHERE posts.Pid_subject=?";
-    $statement = mysqli_prepare( $connection, $sql ); // Preparation de la requete
-    mysqli_stmt_bind_param( $statement, "i", $subject_id ); // Passage des parametres cachés
-    mysqli_stmt_execute( $statement ); // Exécution de la requete 
-    mysqli_stmt_bind_result( $statement, $b_Sid, $b_Sdate, $b_Slabel, $b_Sclosed, $b_Sid_categorie, $b_Sid_user, $b_username, $b_Cname, $b_nbposts ); // On associe des variables aux colonnes récupérées
-    mysqli_stmt_fetch($statement); // On prend le premier enregistrement ( les variables associées précédemment vont être mises à jour )
-    $subject = null;
-    if( $b_Sid ){
-        $subject = [
-            "Sid" => $b_Sid,
-            "Sdate" => $b_Sdate,
-            "Slabel" => $b_Slabel,
-            "Sclosed" => $b_Sclosed,
-            "Sid_categorie" => $b_Sid_categorie,
-            "Sid_user" => $b_Sid_user,
-            "username" => $b_username,
-            "Cname" => $b_Cname,
-            "nbposts" => $b_nbposts
-        ];
-    }
-    $_SESSION["subject"] = $subject;// garder les champs de sujets en session
-    mysqli_stmt_close( $statement ); // Fermeture de la préparation de la requête
-    mysqli_close( $connection ); // Fermeture de la connexion à la base de données
-    return $subject;
 }
 //
 // RECHERCHE DES MESSAGES D'UN SUJET 

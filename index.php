@@ -42,9 +42,9 @@
                 connectionRequired(); 
                 include "services/service_update_post.php";
                 break;        
-            case "delete_posts": // un moderateur ou un admin supprime un ou plusieurs posts de n'importe quel sujet
+            case "delete_post": // un moderateur ou un admin supprime un ou plusieurs posts de n'importe quel sujet
                 connectionRequired(); 
-                include "services/service_delete_posts.php"; // tester si l'utilsiateur est un moderateur ou un user pour tester l'accès à tous les enregistrements ou seulement aux siens
+                include "services/service_delete_post.php"; // tester si l'utilsiateur est un moderateur ou un user pour tester l'accès à tous les enregistrements ou seulement aux siens
                 break;
             default :
                 header("Location: ?page=login");

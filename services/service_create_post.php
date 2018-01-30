@@ -4,19 +4,16 @@
 //
 $error = ""; // init du message erreur
 $create_post_allowed = true; // Flag de création de post autorisée en cas de création de sujet ou pas
-if ( isset ( $_GET["action"] ) ) {
+$subject_id = ""; // Init global de la variable
+$action = ""; // Init global de la variable
+$categorie_id = ""; // Init global de la variable
+$subject_id = ""; // Init global de la variable
+if ( isset ( $_GET["action"] ) || isset ( $_GET["Slabel"] ) || isset ( $_GET["Cid"] ) || isset ( $_GET["Sid"] ) ) {
     $action = $_GET["action"]; // Chargement de la variable action à 0 = Creation de post, 1 = Creation de sujet et de post, 2 = Modif de post, 3 = Suppression de post
-}
-if ( isset ( $_GET["Slabel"] ) ) {
     $subject_label = $_GET["Slabel"]; // Chargement du titre du sujet en cas de création de sujet
-}
-if ( isset ( $_GET["Cid"] ) ) {
     $categorie_id = $_GET["Cid"]; // Chargement de l'id de catégorie en cas de création de sujet
-}
-if ( isset ( $_GET["Sid"] ) ) {
     $subject_id = $_GET["Sid"]; // Chargement de l'id de sujet en cas de création de post seul
-}
-// TEST DE LA PRESENCE DE LA DONNEE DE TITRE DE SUJET
+    // TEST DE LA PRESENCE DE LA DONNEE DE TITRE DE SUJET
     if ( isset( $_POST["Ptitle"] ) && isset( $_POST["Ptext"]) ) { // Si présence d'un libellé de nouveau sujet
         $Ptitle = htmlspecialchars($_POST["Ptitle"]); // titre du nouveau message
         $Ptext = htmlspecialchars($_POST["Ptext"]); // texte du nouveau message
@@ -33,7 +30,7 @@ if ( isset ( $_GET["Sid"] ) ) {
                 $inserted_subject = insertSubject( $subject ); // Executer l'insertion du nouveau sujet et passage du résultat
                 if ( !$_SESSION["id_subject_inserted"] && !$inserted_subject ) { // Si le sujet n'est pas bien ajouté
                     $create_post_allowed = false; // Flag de création de message passé à interdire car sujet pas créée par l'INSERT
-                    $error =  urlencode("Une erreur est survenue lors de l'insertion du sujet !");
+                    $error = urlencode("Une erreur est survenue lors de l'insertion du sujet !");
                 }
             }
         // TEST DE CREATION AUTORISEE DE POST CAR SUJET INSERE OU PRESENT
@@ -73,6 +70,7 @@ if ( isset ( $_GET["Sid"] ) ) {
     } else {
         $error =  urlencode("Il manque des données !"); // message erreur en cas d'absence de titre ou de texte du post de message
     }
+}
 //
 // RENVOI DE PAGE EN FONCTION DE L'ACTION
 // 
