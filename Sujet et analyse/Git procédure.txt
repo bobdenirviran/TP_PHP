@@ -1,6 +1,6 @@
-<?php
+﻿<?php
 // INITIALISATION LA PREMIERE FOIS DU REPOSITORY LOCAL
-// git init
+// git init A faire avant le premier pull ou clone
 
 // MISE A JOUR DU REPOSITORY LOCAL
 // git add .
@@ -18,6 +18,34 @@
 // RECUPERER LE REPOSITORY DANS LE REPERTOIRE DE TRAVAIL à faire dans le répertoire de travail
 // git pull https://github.com/bobdenirviran/TP_PHP
 
-// CHARGEMENT SUR UNE AUTRE MACHINE
+// PAREMETRES DE PUSH SUR UNE AUTRE MACHINE A FAIRE AVANT DE FAIRE LE ADD. à faire dans le répertoire projet
 // git remote add Tp_php https://github.com/bobdenirviran/TP_PHP
+
+// npm install module -D installe uniquement pour le developpement et pas en mise en production (comme gulp ou browser-synxc)
+// npm install module -G installe en general pour entrer des lignes de commande car installation generale sur la machine
+// npm install module -S installe en sauvegarde dans les dépendances de répertoires du projet 
+
+NODE JS
+repository de clonage de Pierre
+https://github.com/Imrikmar66/nodeserver
+
+// npm install mysql -S intalle mysql pour fonctionner avec node js dans le répertoire du projet
+
+// module express pour node.js
+// npm install express -S sur l'ordinateur peremt de gérer les données get et post
+
+// module nodemon sur l'ordinateur permet d'eviter de relancer le serveur sur chaque page en permanence
+// npm install nodemon -G
+
+// nodemon server.js (nodemon nom_de_page.js)
+
+// module ejs pour utiliser en moteur de template
+// npm install ejs -S
+// renommer les fichiers js en .ejs
+
+// npm install bodyparser -S permet de recupérer les get et post de formulaires envoyés
+
+
+
+
 ?>

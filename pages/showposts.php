@@ -12,7 +12,6 @@ if( isset( $_GET["index_page"] ) ) { // Test de la présence de la données dans
     $index_page = 0; // Chargement de la première page par défaut
 }
 $numpage = $index_page + 1;
-echo "<h1>Liste des posts - Page " . $numpage . "</h1>";
 //
 // CHARGEMENT DE L'ACTION CHOISIE OU PAR DEFAUT
 //
@@ -53,8 +52,9 @@ if( isset( $_GET["Sid"] ) ) { // test de présence de l'id du sujet sélectionn�
         //
         // AFFICHAGE DU SUJET EXISTANT
         //
+        echo "<h2 style='color:lightseagreen;' align=center>Catégorie et sujet choisis</h2></br>";
         $html_subject = '<p>Catégorie : ' . $_SESSION["subject"]["Cname"] . '</p>'; // Afficher la catégorie
-        $html_subject .= '<p><table>';
+        $html_subject .= '<p><table class="table table-striped">';
         $html_subject .= '<tr>'; // Entete du tableau des posts
             $html_subject .= '<th>Sujet</th>';
             $html_subject .= '<th>Auteur</th>';
@@ -68,15 +68,25 @@ if( isset( $_GET["Sid"] ) ) { // test de présence de l'id du sujet sélectionn�
         $html_subject .=    '<td>' . $subject["Sdate"]     . ' </td>'; // Date de création du sujet
         $html_subject .=    '<td>' . $subject["nbposts"]   . ' </td>'; // Nombre de posts du sujet
         $html_subject .=    '<td>';
+        if ($_SESSION["subject"]["Sclosed"] == "1" ) { // Test du si sujet fermé alors afficher icone lock
+            $html_subject .= '<span>  </span>';
+            $html_subject .= '<img style="color:lightseagreen;" width="' . ICONE_SIZE . '" src="assets/svg/si-glyph-lock.svg"/>'; 
+            $html_subject .= '<span> </span>';
+        }
+        $html_subject .=        '<img width="' . ICONE_SIZE . '" src="assets/svg/si-glyph-folder-search.svg"/>';
+        $html_subject .=        '<span> </span>';
         $html_subject .=         '<a href="?page=showsubjects">Choisir un autre sujet</a>'; // Lien vers la liste des sujets pour en choisir un autre
         if ( $action == "2" || $action == "3" ) {
-                $html_subject .= '<span> </span>';
+                $html_subject .= '<span>  </span>';
+                $html_subject .=        '<img width="' . ICONE_SIZE . '" src="assets/svg/si-glyph-pen.svg"/>';
+                $html_subject .=        '<span> </span>';
                 $html_subject .= '<a href="?page=showposts&Sid=' . $subject_id . '">Envoyer un nouveau message</a>'; // Lien vers la création de message
         }
         $html_subject .= '</td>';
         $html_subject .= '</tr>';
         $html_subject .= '</table></p>';
         echo $html_subject;
+        echo "<h2 style='color:lightseagreen;' align=center>Liste des posts - Page " . $numpage . "</h2></br>";
         //
         // RECHERCHE ET CHARGEMENT DE LA PAGE DES POSTS DU SUJET
         //
@@ -86,7 +96,7 @@ if( isset( $_GET["Sid"] ) ) { // test de présence de l'id du sujet sélectionn�
             // AFFICHAGE DE L'ENTETE DES POSTS DU SUJET
             //
             $html_entete_post = '';
-            $html_entete_post .= '<p><table>';
+            $html_entete_post .= '<p><table class="table table-striped">';
             $html_entete_post .= '<tr>'; // Entete du tableau des posts
             $html_entete_post .=   '<th>Titre</th>';
             $html_entete_post .=   '<th>Auteur</th>';
@@ -109,6 +119,8 @@ if( isset( $_GET["Sid"] ) ) { // test de présence de l'id du sujet sélectionn�
                 if( intval( $postrows[$key]["Pid_user"] ) == $_SESSION["user"]["id"] && $_SESSION["subject"]["Sclosed"] == 0 ) {  // Test du membre connecté est l'auteur du message ou si sujet non clos
                     $_SESSION["Ptitle"] = htmlspecialchars($postrows[$key]["Ptitle"]); // conservation du champs titre du message (max 255 car.) en session pour éviter de le passer dans l'url ou le POST
                     $_SESSION["Ptext"] = htmlspecialchars($postrows[$key]["Ptext"]); // conservation du champs texte du message (max 1000 car.) en session pour éviter de le passer dans l'url ou le POST
+                    $html_post .= '<span>  </span>';
+                    $html_post .= '<img width="' . ICONE_SIZE . '" src="assets/svg/si-glyph-document-edit.svg"/>'; 
                     $html_post .= '<span> </span>';
                     $html_post .= '<a href="?page=showposts&action=2&Uid=' . $postrows[$key]["Pid_user"] .'&Pid=' . $postrows[$key]["Pid"]  . '&Sid=' . $postrows[$key]["Pid_subject"] . '">Modifier</a>';
                 }
@@ -116,7 +128,9 @@ if( isset( $_GET["Sid"] ) ) { // test de présence de l'id du sujet sélectionn�
                 // AFFICHER LE LIEN DE LA SUPPRESSION POUR CHAQUE MESSAGE SI ADMIN OU MODERATEUR OU USER AUTEUR
                 //
                 if( (intval( $postrows[$key]["Pid_user"] ) == $_SESSION["user"]["id"] && $_SESSION["subject"]["Sclosed"] == 0 ) || $_SESSION["user"]["id_role"] < 3  ) { // Test du membre connecté est l'auteur du message Ou si membre connecté est un administrateur ou un modérateur ou si sujet non clos
-                    $html_post .= '<span> </span>';
+                    $html_post .= '<span>  </span>';
+                    $html_post .= '<img width="' . ICONE_SIZE . '" src="assets/svg/si-glyph-document-error.svg"/>';
+                    $html_post .= '<span> </span>';        
                     $html_post .= '<a href="?page=showposts&action=3&Uid=' . $postrows[$key]["Pid_user"] . '&Pid=' . $postrows[$key]["Pid"]  . '&Sid=' . $postrows[$key]["Pid_subject"] . '">Supprimer</a>';
                 }
                     $html_post .= '</td>';

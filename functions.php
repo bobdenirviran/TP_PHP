@@ -19,6 +19,8 @@
     define("USER", 3);
     // CONSTANTE DU NOMBRE DE POSTS PAR PAGE
     define("POSTS_BY_PAGE", 2);
+    // TAILLE DES ICONES BOOTSTRAP
+    define("ICONE_SIZE", "20px");
 //
 // CONNEXION A LA BASE DE DONNEES
 //
